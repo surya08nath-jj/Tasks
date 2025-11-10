@@ -36,29 +36,34 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
      * @returns {search.Search} Invoice search object
      */
     const createInvoiceSearch = () => {
-      return search.create({
-        type: search.Type.INVOICE,
-        filters: [
-          ['duedate', 'onorbefore', 'lastmonth'],
-          'AND',
-          ['status', 'anyof', ['CustInvc:A']],
-          'AND',
-          ['mainline', 'is', 'T'],
-          'AND',
-          ['customermain.isinactive', 'is', 'F'],
-          'AND',
-          ['salesrep.isinactive', 'is', 'F']
-        ],
-        columns: [
-          'internalid',
-          'tranid',
-          'entity',
-          'amount',
-          'duedate',
-          'salesrep',
-          'daysoverdue'
-        ]
-      });
+      try {
+        return search.create({
+          type: search.Type.INVOICE,
+          filters: [
+            ['duedate', 'onorbefore', 'lastmonth'],
+            'AND',
+            ['status', 'anyof', ['CustInvc:A']],
+            'AND',
+            ['mainline', 'is', 'T'],
+            'AND',
+            ['customermain.isinactive', 'is', 'F'],
+            'AND',
+            ['salesrep.isinactive', 'is', 'F']
+          ],
+          columns: [
+            'internalid',
+            'tranid',
+            'entity',
+            'amount',
+            'duedate',
+            'salesrep',
+            'daysoverdue'
+          ]
+        });
+      } catch (error) {
+        log.error('createInvoiceSearch Error', error.message);
+        throw error;
+      }
     };
 
     /**
@@ -66,10 +71,14 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
      * @param {search.Search} searchObj - The invoice search object
      */
     const logSearchResults = (searchObj) => {
-      searchObj.run().each(result => {
-        log.debug('Search Result', `Customer: ${result.getText('entity')}, Invoice: ${result.getValue('tranid')}, Amount: ${result.getValue('amount')}, Due: ${result.getValue('duedate')}, Days Overdue: ${result.getValue('daysoverdue')}`);
-        return true;
-      });
+      try {
+        searchObj.run().each(searchResult => {
+          log.debug('Search Result', `Customer: ${searchResult.getText('entity')}, Invoice: ${searchResult.getValue('tranid')}, Amount: ${searchResult.getValue('amount')}, Due: ${searchResult.getValue('duedate')}, Days Overdue: ${searchResult.getValue('daysoverdue')}`);
+          return true;
+        });
+      } catch (error) {
+        log.error('logSearchResults Error', error.message);
+      }
     };
 
     /**
@@ -83,8 +92,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           type: record.Type.CUSTOMER,
           id: customerId
         }).getValue('email');
-      } catch (e) {
-        log.error('Customer Email Lookup Error', e.message);
+      } catch (error) {
+        log.error('getCustomerEmail Error', error.message);
         return null;
       }
     };
@@ -92,25 +101,30 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
     /**
      * Creates a CSV file summarizing overdue invoices for a customer.
      * @param {string} customerName - Name of the customer
-     * @param {Object[]} invoices - Array of invoice data
+     * @param {Object[]} invoiceList - Array of invoice data
      * @param {string} customerEmail - Email address of the customer
      * @returns {file.File} NetSuite file object
      */
-    const createCsvFile = (customerName, invoices, customerEmail) => {
-      const csvContent = ['Customer Name, Customer Email,Invoice Number,Invoice Amount,Due Date,Days Overdue'];
-      invoices.forEach(inv => {
-        csvContent.push(`${inv.customerName},${customerEmail},${inv.invoiceNumber},${inv.invoiceAmount},${inv.dueDate},${inv.daysOverdue}`);
-      });
+    const createCsvFile = (customerName, invoiceList, customerEmail) => {
+      try {
+        const csvContent = ['Customer Name, Customer Email,Invoice Number,Invoice Amount,Due Date,Days Overdue'];
+        invoiceList.forEach(invoice => {
+          csvContent.push(`${invoice.customerName},${customerEmail},${invoice.invoiceNumber},${invoice.invoiceAmount},${invoice.dueDate},${invoice.daysOverdue}`);
+        });
 
-      const csvFile = file.create({
-        name: `Overdue_Invoices_${customerName}.csv`,
-        fileType: file.Type.CSV,
-        contents: csvContent.join('\n'),
-        folder: 116 // Replace with your File Cabinet folder ID
-      });
+        const csvFile = file.create({
+          name: `Overdue_Invoices_${customerName}.csv`,
+          fileType: file.Type.CSV,
+          contents: csvContent.join('\n'),
+          folder: 116 // Replace with your File Cabinet folder ID
+        });
 
-      csvFile.save();
-      return csvFile;
+        csvFile.save();
+        return csvFile;
+      } catch (error) {
+        log.error('createCsvFile Error', error.message);
+        throw error;
+      }
     };
 
     /**
@@ -132,8 +146,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
         });
 
         log.audit('Email Sent', `Email sent to ${customerName} (${customerEmail}) from sender ID ${senderId}.`);
-      } catch (e) {
-        log.error('Email Send Failed', `Customer: ${customerName}, Error: ${e.message}`);
+      } catch (error) {
+        log.error('sendEmailWithAttachment Error', `Customer: ${customerName}, Error: ${error.message}`);
       }
     };
 
@@ -144,9 +158,9 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
     const getInputData = () => {
       try {
         log.debug('getInputData', 'Starting overdue invoice search');
-        const searchObj = createInvoiceSearch();
-        logSearchResults(searchObj);
-        return searchObj;
+        const invoiceSearchObj = createInvoiceSearch();
+        logSearchResults(invoiceSearchObj);
+        return invoiceSearchObj;
       } catch (error) {
         log.error('getInputData Error', error.message);
         throw error;
@@ -159,12 +173,12 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
      */
     const map = (scriptContext) => {
       try {
-        const result = JSON.parse(scriptContext.value);
-        const invoiceData = result.values;
+        const searchResult = JSON.parse(scriptContext.value);
+        const invoiceData = searchResult.values;
 
         const customerId = invoiceData.entity.value;
         const invoiceSummary = {
-          invoiceId: result.id,
+          invoiceId: searchResult.id,
           invoiceNumber: invoiceData.tranid,
           invoiceAmount: invoiceData.amount,
           dueDate: invoiceData.duedate,
@@ -178,7 +192,7 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           value: invoiceSummary
         });
       } catch (error) {
-        log.error('Map Error', error.message);
+        log.error('map Error', error.message);
       }
     };
 
@@ -189,9 +203,9 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
     const reduce = (scriptContext) => {
       try {
         const customerId = scriptContext.key;
-        const invoices = scriptContext.values.map(JSON.parse);
-        const customerName = invoices[0].customerName;
-        const salesRepId = invoices[0].salesRep;
+        const invoiceList = scriptContext.values.map(JSON.parse);
+        const customerName = invoiceList[0].customerName;
+        const salesRepId = invoiceList[0].salesRep;
         const fallbackSenderId = -5; // Replace with your Admin ID
 
         const customerEmail = getCustomerEmail(customerId);
@@ -200,12 +214,12 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           return;
         }
 
-        const csvFile = createCsvFile(customerName, invoices, customerEmail);
+        const csvFile = createCsvFile(customerName, invoiceList, customerEmail);
         const senderId = salesRepId || fallbackSenderId;
 
         sendEmailWithAttachment(senderId, customerId, customerName, csvFile, customerEmail);
       } catch (error) {
-        log.error('Reduce Error', error.message);
+        log.error('reduce Error', error.message);
       }
     };
 
