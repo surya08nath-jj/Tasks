@@ -1,0 +1,24 @@
+<customlist scriptid="customlist_jj_gender">
+  <description></description>
+  <isinactive>F</isinactive>
+  <ismatrixoption>F</ismatrixoption>
+  <isordered>T</isordered>
+  <name>Gender</name>
+  <customvalues>
+    <customvalue scriptid="1">
+      <abbreviation>F</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Female</value>
+    </customvalue>
+    <customvalue scriptid="2">
+      <abbreviation>M</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Male</value>
+    </customvalue>
+    <customvalue scriptid="3">
+      <abbreviation>O</abbreviation>
+      <isinactive>F</isinactive>
+      <value>Other</value>
+    </customvalue>
+  </customvalues>
+</customlist>

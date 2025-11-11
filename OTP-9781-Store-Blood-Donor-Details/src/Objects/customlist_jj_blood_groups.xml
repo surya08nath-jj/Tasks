@@ -1,0 +1,49 @@
+<customlist scriptid="customlist_jj_blood_groups">
+  <description></description>
+  <isinactive>F</isinactive>
+  <ismatrixoption>F</ismatrixoption>
+  <isordered>T</isordered>
+  <name>Blood Groups</name>
+  <customvalues>
+    <customvalue scriptid="1">
+      <abbreviation>A</abbreviation>
+      <isinactive>F</isinactive>
+      <value>A+</value>
+    </customvalue>
+    <customvalue scriptid="2">
+      <abbreviation>A</abbreviation>
+      <isinactive>F</isinactive>
+      <value>A-</value>
+    </customvalue>
+    <customvalue scriptid="3">
+      <abbreviation>B</abbreviation>
+      <isinactive>F</isinactive>
+      <value>B+</value>
+    </customvalue>
+    <customvalue scriptid="4">
+      <abbreviation>B</abbreviation>
+      <isinactive>F</isinactive>
+      <value>B-</value>
+    </customvalue>
+    <customvalue scriptid="5">
+      <abbreviation>A</abbreviation>
+      <isinactive>F</isinactive>
+      <value>AB+</value>
+    </customvalue>
+    <customvalue scriptid="6">
+      <abbreviation>A</abbreviation>
+      <isinactive>F</isinactive>
+      <value>AB-</value>
+    </customvalue>
+    <customvalue scriptid="7">
+      <abbreviation>O</abbreviation>
+      <isinactive>F</isinactive>
+      <value>O+</value>
+    </customvalue>
+    <customvalue scriptid="8">
+      <abbreviation>O</abbreviation>
+      <isinactive>F</isinactive>
+      <value>O-</value>
+    </customvalue>
+  </customvalues>
+</customlist>
