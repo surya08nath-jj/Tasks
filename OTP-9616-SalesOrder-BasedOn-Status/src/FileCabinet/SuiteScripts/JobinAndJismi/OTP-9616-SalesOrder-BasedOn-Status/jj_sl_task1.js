@@ -53,45 +53,50 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
     };
 
     /**
-     * Creates the Suitelet form with filter fields.
-     * @returns {Form} NetSuite form object
-     */
+    * Creates the Suitelet form with filter fields.
+    * @returns {Form} NetSuite form object
+    */
     function createFormWithFilters() {
-      const form = serverWidget.createForm({ title: 'Sales Orders by Status' });
-      form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
+      try {
+        const form = serverWidget.createForm({ title: 'Sales Orders by Status' });
+        form.clientScriptModulePath = CLIENT_SCRIPT_PATH;
 
-      const statusField = form.addField({
-        id: 'custpage_jj_status_filter',
-        type: serverWidget.FieldType.SELECT,
-        label: 'Status',
-        source: 'salesorderstatus'
-      });
-      statusField.addSelectOption({ value: '', text: '' });
-      statusField.addSelectOption({ value: 'SalesOrd:B', text: 'Pending Fulfillment' });
-      statusField.addSelectOption({ value: 'SalesOrd:F', text: 'Pending Billing' });
+        const statusField = form.addField({
+          id: 'custpage_jj_status_filter',
+          type: serverWidget.FieldType.SELECT,
+          label: 'Status',
+          source: 'salesorderstatus'
+        });
+        statusField.addSelectOption({ value: '', text: '' });
+        statusField.addSelectOption({ value: 'SalesOrd:B', text: 'Pending Fulfillment' });
+        statusField.addSelectOption({ value: 'SalesOrd:F', text: 'Pending Billing' });
 
-      form.addField({
-        id: 'custpage_jj_customer_filter',
-        type: serverWidget.FieldType.SELECT,
-        label: 'Customer',
-        source: 'customer'
-      });
+        form.addField({
+          id: 'custpage_jj_customer_filter',
+          type: serverWidget.FieldType.SELECT,
+          label: 'Customer',
+          source: 'customer'
+        });
 
-      form.addField({
-        id: 'custpage_jj_subsidiary_filter',
-        type: serverWidget.FieldType.SELECT,
-        label: 'Subsidiary',
-        source: 'subsidiary'
-      });
+        form.addField({
+          id: 'custpage_jj_subsidiary_filter',
+          type: serverWidget.FieldType.SELECT,
+          label: 'Subsidiary',
+          source: 'subsidiary'
+        });
 
-      form.addField({
-        id: 'custpage_jj_department_filter',
-        type: serverWidget.FieldType.SELECT,
-        label: 'Department',
-        source: 'department'
-      });
+        form.addField({
+          id: 'custpage_jj_department_filter',
+          type: serverWidget.FieldType.SELECT,
+          label: 'Department',
+          source: 'department'
+        });
 
-      return form;
+        return form;
+      } catch (err) {
+        log.error('createFormWithFilters failed', err);
+        throw err;
+      }
     }
 
     /**
@@ -100,21 +105,26 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
      * @param {Object} params - Request parameters
      */
     function applyDefaultFilterValues(form, params) {
-      const fieldIds = [
-        'custpage_jj_status_filter',
-        'custpage_jj_customer_filter',
-        'custpage_jj_subsidiary_filter',
-        'custpage_jj_department_filter'
-      ];
-      fieldIds.forEach(id => {
-        if (params[id]) {
-          try {
-            form.getField({ id }).defaultValue = params[id];
-          } catch (e) {
-            log.debug(`Default value set failed for ${id}`, e);
+      try {
+        const fieldIds = [
+          'custpage_jj_status_filter',
+          'custpage_jj_customer_filter',
+          'custpage_jj_subsidiary_filter',
+          'custpage_jj_department_filter'
+        ];
+        fieldIds.forEach(id => {
+          if (params[id]) {
+            try {
+              form.getField({ id }).defaultValue = params[id];
+            } catch (e) {
+              log.debug(`Default value set failed for ${id}`, e);
+            }
           }
-        }
-      });
+        });
+      } catch (err) {
+        log.error('applyDefaultFilterValues failed', err);
+        throw err;
+      }
     }
 
     /**
@@ -123,28 +133,33 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
      * @returns {Sublist} NetSuite sublist object
      */
     function buildSalesOrderSublist(form) {
-      const sublist = form.addSublist({
-        id: 'custpage_jj_salesorder_sublist',
-        type: serverWidget.SublistType.LIST,
-        label: 'Sales Orders'
-      });
+      try {
+        const sublist = form.addSublist({
+          id: 'custpage_jj_salesorder_sublist',
+          type: serverWidget.SublistType.LIST,
+          label: 'Sales Orders'
+        });
 
-      const fields = [
-        { id: 'custpage_jj_so_internalid', type: serverWidget.FieldType.TEXT, label: 'Internal ID' },
-        { id: 'custpage_jj_so_tranid', type: serverWidget.FieldType.TEXT, label: 'Document Name' },
-        { id: 'custpage_jj_so_date', type: serverWidget.FieldType.DATE, label: 'Date' },
-        { id: 'custpage_jj_so_status', type: serverWidget.FieldType.TEXT, label: 'Status' },
-        { id: 'custpage_jj_so_customer', type: serverWidget.FieldType.TEXT, label: 'Customer Name' },
-        { id: 'custpage_jj_so_subsidiary', type: serverWidget.FieldType.TEXT, label: 'Subsidiary' },
-        { id: 'custpage_jj_so_department', type: serverWidget.FieldType.TEXT, label: 'Department' },
-        { id: 'custpage_jj_so_class', type: serverWidget.FieldType.TEXT, label: 'Class' },
-        { id: 'custpage_jj_so_subtotal', type: serverWidget.FieldType.CURRENCY, label: 'Subtotal' },
-        { id: 'custpage_jj_so_tax', type: serverWidget.FieldType.CURRENCY, label: 'Tax' },
-        { id: 'custpage_jj_so_total', type: serverWidget.FieldType.CURRENCY, label: 'Total' }
-      ];
+        const fields = [
+          { id: 'custpage_jj_so_internalid', type: serverWidget.FieldType.TEXT, label: 'Internal ID' },
+          { id: 'custpage_jj_so_tranid', type: serverWidget.FieldType.TEXT, label: 'Document Name' },
+          { id: 'custpage_jj_so_date', type: serverWidget.FieldType.DATE, label: 'Date' },
+          { id: 'custpage_jj_so_status', type: serverWidget.FieldType.TEXT, label: 'Status' },
+          { id: 'custpage_jj_so_customer', type: serverWidget.FieldType.TEXT, label: 'Customer Name' },
+          { id: 'custpage_jj_so_subsidiary', type: serverWidget.FieldType.TEXT, label: 'Subsidiary' },
+          { id: 'custpage_jj_so_department', type: serverWidget.FieldType.TEXT, label: 'Department' },
+          { id: 'custpage_jj_so_class', type: serverWidget.FieldType.TEXT, label: 'Class' },
+          { id: 'custpage_jj_so_subtotal', type: serverWidget.FieldType.CURRENCY, label: 'Subtotal' },
+          { id: 'custpage_jj_so_tax', type: serverWidget.FieldType.CURRENCY, label: 'Tax' },
+          { id: 'custpage_jj_so_total', type: serverWidget.FieldType.CURRENCY, label: 'Total' }
+        ];
 
-      fields.forEach(field => sublist.addField(field));
-      return sublist;
+        fields.forEach(field => sublist.addField(field));
+        return sublist;
+      } catch (err) {
+        log.error('buildSalesOrderSublist failed', err);
+        throw err;
+      }
     }
 
     /**
@@ -153,26 +168,31 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
      * @returns {Array} Array of search filters
      */
     function buildSearchFilters(params) {
-      const filters = [
-        ['mainline', 'is', 'T'],
-        'AND',
-        ['status', 'anyof', ['SalesOrd:B', 'SalesOrd:F']]
-      ];
+      try {
+        const filters = [
+          ['mainline', 'is', 'T'],
+          'AND',
+          ['status', 'anyof', ['SalesOrd:B', 'SalesOrd:F']]
+        ];
 
-      if (params.custpage_jj_status_filter) {
-        filters.push('AND', ['status', 'anyof', params.custpage_jj_status_filter]);
-      }
-      if (params.custpage_jj_customer_filter) {
-        filters.push('AND', ['entity', 'anyof', params.custpage_jj_customer_filter]);
-      }
-      if (params.custpage_jj_subsidiary_filter) {
-        filters.push('AND', ['subsidiary', 'anyof', params.custpage_jj_subsidiary_filter]);
-      }
-      if (params.custpage_jj_department_filter) {
-        filters.push('AND', ['department', 'anyof', params.custpage_jj_department_filter]);
-      }
+        if (params.custpage_jj_status_filter) {
+          filters.push('AND', ['status', 'anyof', params.custpage_jj_status_filter]);
+        }
+        if (params.custpage_jj_customer_filter) {
+          filters.push('AND', ['entity', 'anyof', params.custpage_jj_customer_filter]);
+        }
+        if (params.custpage_jj_subsidiary_filter) {
+          filters.push('AND', ['subsidiary', 'anyof', params.custpage_jj_subsidiary_filter]);
+        }
+        if (params.custpage_jj_department_filter) {
+          filters.push('AND', ['department', 'anyof', params.custpage_jj_department_filter]);
+        }
 
-      return filters;
+        return filters;
+      } catch (err) {
+        log.error('buildSearchFilters failed', err);
+        throw err;
+      }
     }
 
     /**
@@ -181,21 +201,26 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
      * @returns {Result[]} Array of search results
      */
     function runSalesOrderSearch(filters) {
-      const soSearch = search.create({
-        type: search.Type.SALES_ORDER,
-        filters: filters,
-        columns: [
-          'internalid', 'tranid', 'trandate', 'statusref', 'entity',
-          'subsidiary', 'department', 'class', 'grossamount', 'taxamount', 'amount'
-        ]
-      });
+      try {
+        const soSearch = search.create({
+          type: search.Type.SALES_ORDER,
+          filters: filters,
+          columns: [
+            'internalid', 'tranid', 'trandate', 'statusref', 'entity',
+            'subsidiary', 'department', 'class', 'grossamount', 'taxamount', 'amount'
+          ]
+        });
 
-      const results = [];
-      soSearch.run().each(result => {
-        results.push(result);
-        return true;
-      });
-      return results;
+        const results = [];
+        soSearch.run().each(result => {
+          results.push(result);
+          return true;
+        });
+        return results;
+      } catch (err) {
+        log.error('runSalesOrderSearch failed', err);
+        throw err;
+      }
     }
 
     /**
@@ -203,22 +228,26 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
      * @param {Sublist} sublist - NetSuite sublist object
      * @param {Result[]} results - Array of search results
      */
-      function populateSublistWithResults(sublist, results) {
-      results.forEach((result, line) => {
-        safeSet(sublist, { id: 'custpage_jj_so_internalid', line, value: result.getValue('internalid') });
-        safeSet(sublist, { id: 'custpage_jj_so_tranid', line, value: result.getValue('tranid') });
-        safeSet(sublist, { id: 'custpage_jj_so_date', line, value: result.getValue('trandate') });
-        safeSet(sublist, { id: 'custpage_jj_so_status', line, value: result.getText('statusref') });
-        safeSet(sublist, { id: 'custpage_jj_so_customer', line, value: result.getText('entity') });
-        safeSet(sublist, { id: 'custpage_jj_so_subsidiary', line, value: result.getText('subsidiary') });
-        safeSet(sublist, { id: 'custpage_jj_so_department', line, value: result.getText('department') });
-        safeSet(sublist, { id: 'custpage_jj_so_class', line, value: result.getText('class') });
-        safeSet(sublist, { id: 'custpage_jj_so_subtotal', line, value: result.getValue('grossamount') });
-        safeSet(sublist, { id: 'custpage_jj_so_tax', line, value: result.getValue('taxamount') });
-        safeSet(sublist, { id: 'custpage_jj_so_total', line, value: result.getValue('amount') });
-      });
+    function populateSublistWithResults(sublist, results) {
+      try {
+        results.forEach((result, line) => {
+          safeSet(sublist, { id: 'custpage_jj_so_internalid', line, value: result.getValue('internalid') });
+          safeSet(sublist, { id: 'custpage_jj_so_tranid', line, value: result.getValue('tranid') });
+          safeSet(sublist, { id: 'custpage_jj_so_date', line, value: result.getValue('trandate') });
+          safeSet(sublist, { id: 'custpage_jj_so_status', line, value: result.getText('statusref') });
+          safeSet(sublist, { id: 'custpage_jj_so_customer', line, value: result.getText('entity') });
+          safeSet(sublist, { id: 'custpage_jj_so_subsidiary', line, value: result.getText('subsidiary') });
+          safeSet(sublist, { id: 'custpage_jj_so_department', line, value: result.getText('department') });
+          safeSet(sublist, { id: 'custpage_jj_so_class', line, value: result.getText('class') });
+          safeSet(sublist, { id: 'custpage_jj_so_subtotal', line, value: result.getValue('grossamount') });
+          safeSet(sublist, { id: 'custpage_jj_so_tax', line, value: result.getValue('taxamount') });
+          safeSet(sublist, { id: 'custpage_jj_so_total', line, value: result.getValue('amount') });
+        });
+      } catch (err) {
+        log.error('populateSublistWithResults failed', err);
+        throw err;
+      }
     }
-
 
     /**
  * Safely sets a value in a sublist field, converting null or Date values appropriately.
