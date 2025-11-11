@@ -1,0 +1,25 @@
+<suitelet scriptid="customscript_jj_sl_so_basedonstatus">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>JJ SL Sales Order Basedon status</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <scriptfile>[/SuiteScripts/JobinAndJismi/OTP-9616-TASKS/jj_sl_so_basedon_status.js]</scriptfile>
+  <scriptdeployments>
+    <scriptdeployment scriptid="customdeploy_jj_sl_so_basedonstatus">
+      <allemployees>F</allemployees>
+      <allpartners>F</allpartners>
+      <allroles>T</allroles>
+      <audslctrole></audslctrole>
+      <eventtype></eventtype>
+      <isdeployed>T</isdeployed>
+      <isonline>F</isonline>
+      <loglevel>DEBUG</loglevel>
+      <runasrole></runasrole>
+      <status>RELEASED</status>
+      <title>JJ SL SO BASEDONSTATUS</title>
+    </scriptdeployment>
+  </scriptdeployments>
+</suitelet>
