@@ -13,7 +13,7 @@
  * 
  * Date Created : 11-November-2025 
  * 
- * Description : User Event Script to detect changes in customer address during edit and update a custom checkbox field.
+ * Description : User Event Script to detect changes in customer address during edit and update a custom checkbox field
  * 
  * REVISION HISTORY
  *
