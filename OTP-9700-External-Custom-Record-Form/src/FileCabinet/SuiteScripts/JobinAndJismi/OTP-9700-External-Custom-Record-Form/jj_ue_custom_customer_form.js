@@ -86,13 +86,33 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
         author: adminEmployeeId,
         recipients: adminEmployeeId,
         subject: 'New Customer Enquiry',
-        body: `Name: ${customerName}\nEmail: ${customerEmail}\nSubject: ${enquirySubject}\nMessage: ${enquiryMessage}`
+        body: `Dear Admin,
+
+A new customer enquiry has been received. Please find the details below:
+
+Customer Name: ${customerName}
+Customer Email: ${customerEmail}
+Subject: ${enquirySubject}
+Message:
+${enquiryMessage}
+
+Please review and take appropriate action.
+
+Best regards,
+Team Netsuite`
       });
-      log.audit({ title: 'Admin Notified', details: `Enquiry from ${customerName} sent to admin.` });
+
+      log.audit({
+        title: 'Admin Notified',
+        details: `Enquiry from ${customerName} sent to admin.`
+      });
+    } catch (error) {
+      log.error({
+        title: 'notifyAdmin Error',
+        details: error.message
+      });
     }
-    catch (error) {
-      log.error({ title: 'notifyAdmin Error', details: error.message });
-    }
+
   }
 
   /**
@@ -109,12 +129,31 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
         author: adminEmployeeId,
         recipients: salesRepId,
         subject: 'Customer Enquiry Received',
-        body: `Customer: ${customerName} (${customerEmail})\nSubject: ${enquirySubject}\nMessage: ${enquiryMessage}`
+        body: `Dear Sales Representative,
+
+You have received a new customer enquiry. Please find the details below:
+
+Customer Name: ${customerName}
+Customer Email: ${customerEmail}
+Subject: ${enquirySubject}
+Message:
+${enquiryMessage}
+
+Kindly follow up with the customer at your earliest convenience.
+
+Best regards,
+Team Netsuite`
       });
-      log.audit({ title: 'Sales Rep Notified', details: `Enquiry from ${customerName} sent to sales rep ID ${salesRepId}.` });
-    }
-    catch (error) {
-      log.error({ title: 'notifySalesRep Error', details: error.message });
+
+      log.audit({
+        title: 'Sales Rep Notified',
+        details: `Enquiry from ${customerName} sent to sales rep ID ${salesRepId}.`
+      });
+    } catch (error) {
+      log.error({
+        title: 'Email Notification Failed',
+        details: `Failed to send enquiry notification to sales rep ID ${salesRepId}. Error: ${error.message}`
+      });
     }
   }
 
