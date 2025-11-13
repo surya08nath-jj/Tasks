@@ -21,15 +21,24 @@
  * 
 *************************************************************************************************/
 
-define(['N/ui/serverWidget', 'N/record', 'N/log'], function (serverWidget, record, log) {
+define(['N/ui/serverWidget', 'N/record', 'N/log', 'N/search'], function (serverWidget, record, log, search) {
 
   /**
    * Builds and returns the customer enquiry form.
+   * @param {string} [errorMessage] - Optional error message to display
    * @returns {serverWidget.Form} NetSuite form object
    */
-  function buildForm() {
+  function buildForm(errorMessage) {
     try {
       const form = serverWidget.createForm({ title: 'Customer Enquiry Form' });
+
+      if (errorMessage) {
+        form.addField({
+          id: 'custpage_error',
+          type: serverWidget.FieldType.INLINEHTML,
+          label: ' '
+        }).defaultValue = `<div style="color:red;font-weight:bold;">${errorMessage}</div>`;
+      }
 
       form.addField({
         id: 'custpage_name',
@@ -58,9 +67,32 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'], function (serverWidget, recor
       form.addSubmitButton({ label: 'Submit Enquiry' });
 
       return form;
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'buildForm Error', details: error.message });
       throw error;
+    }
+  }
+
+  /**
+   * Checks if an enquiry with the same email already exists.
+   * @param {string} email - Email address to check
+   * @returns {boolean} True if duplicate exists, false otherwise
+   */
+  function isDuplicateEmail(email) {
+    try {
+      const enquirySearch = search.create({
+        type: 'customrecord_jj_custom_customer_record',
+        filters: [['custrecord_jj_customer_email', 'is', email]],
+        columns: ['internalid']
+      });
+
+      const results = enquirySearch.run().getRange({ start: 0, end: 1 });
+      return results.length > 0;
+    }
+    catch (error) {
+      log.error({ title: 'Duplicate Check Error', details: error.message });
+      return false;
     }
   }
 
@@ -85,7 +117,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'], function (serverWidget, recor
       log.audit({ title: 'Enquiry Created', details: `Record ID: ${enquiryId}` });
 
       return enquiryId;
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'createEnquiryRecord Error', details: error.message });
       return null;
     }
@@ -107,6 +140,12 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'], function (serverWidget, recor
           message: context.request.parameters.custpage_message
         };
 
+        if (isDuplicateEmail(params.email)) {
+          const formWithError = buildForm('An enquiry with this email already exists.');
+          context.response.writePage(formWithError);
+          return;
+        }
+
         const enquiryId = createEnquiryRecord(params);
 
         if (enquiryId) {
@@ -115,7 +154,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'], function (serverWidget, recor
           context.response.write('An error occurred while saving your enquiry. Please try again.');
         }
       }
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'onRequest Error', details: error.message });
       context.response.write('An unexpected error occurred. Please try again later.');
     }

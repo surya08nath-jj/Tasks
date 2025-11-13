@@ -40,7 +40,8 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
 
       const result = customerSearch.run().getRange({ start: 0, end: 1 });
       return result.length > 0 ? result[0] : null;
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'Customer Search Error', details: error.message });
       return null;
     }
@@ -66,7 +67,8 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
 
       enquiryRecord.save();
       log.audit({ title: 'Customer Linked', details: `Linked enquiry ${enquiryId} to customer ID ${customerId}` });
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'Linking Error', details: error.message });
     }
   }
@@ -87,7 +89,8 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
         body: `Name: ${name}\nEmail: ${emailValue}\nSubject: ${subject}\nMessage: ${message}`
       });
       log.audit({ title: 'Admin Notified', details: `Enquiry from ${name} sent to admin.` });
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'Admin Notification Error', details: error.message });
     }
   }
@@ -109,7 +112,8 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
         body: `Customer: ${name} (${emailValue})\nSubject: ${subject}\nMessage: ${message}`
       });
       log.audit({ title: 'Sales Rep Notified', details: `Enquiry from ${name} sent to sales rep ID ${salesRepId}.` });
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'Sales Rep Notification Error', details: error.message });
     }
   }
@@ -144,7 +148,8 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
           notifySalesRep(salesRepId, nameValue, emailValue, subjectValue, messageValue);
         }
       }
-    } catch (error) {
+    }
+    catch (error) {
       log.error({ title: 'afterSubmit Error', details: error.message });
     }
   }
