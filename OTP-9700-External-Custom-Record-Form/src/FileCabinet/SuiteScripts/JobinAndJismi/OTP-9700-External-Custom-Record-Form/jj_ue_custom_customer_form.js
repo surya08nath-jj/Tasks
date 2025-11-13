@@ -23,40 +23,40 @@
 
 define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (record, search, email, runtime, log) {
 
-  const ADMIN_EMPLOYEE_ID = -5; // 🔁 Replace with a valid employee internal ID
+  const adminEmployeeId = -5; // 🔁 Replace with a valid employee internal ID
 
   /**
    * Searches for a customer record by email.
-   * @param {string} emailValue - Email address to search
+   * @param {string} customerEmail - Email address to search
    * @returns {search.Result|null} Matching customer result or null
    */
-  function findCustomerByEmail(emailValue) {
+  function findCustomerByEmail(customerEmail) {
     try {
       const customerSearch = search.create({
         type: search.Type.CUSTOMER,
-        filters: [['email', 'is', emailValue]],
+        filters: [['email', 'is', customerEmail]],
         columns: ['internalid', 'salesrep', 'entityid']
       });
 
-      const result = customerSearch.run().getRange({ start: 0, end: 1 });
-      return result.length > 0 ? result[0] : null;
+      const searchResults = customerSearch.run().getRange({ start: 0, end: 1 });
+      return searchResults.length > 0 ? searchResults[0] : null;
     }
     catch (error) {
-      log.error({ title: 'Customer Search Error', details: error.message });
+      log.error({ title: 'findCustomerByEmail Error', details: error.message });
       return null;
     }
   }
 
   /**
    * Links a customer record to the enquiry record.
-   * @param {number|string} enquiryId - Internal ID of the enquiry record
+   * @param {number|string} enquiryRecordId - Internal ID of the enquiry record
    * @param {number|string} customerId - Internal ID of the customer
    */
-  function linkCustomerToEnquiry(enquiryId, customerId) {
+  function linkCustomerToEnquiry(enquiryRecordId, customerId) {
     try {
       const enquiryRecord = record.load({
         type: 'customrecord_jj_custom_customer_record',
-        id: enquiryId,
+        id: enquiryRecordId,
         isDynamic: true
       });
 
@@ -66,55 +66,55 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
       });
 
       enquiryRecord.save();
-      log.audit({ title: 'Customer Linked', details: `Linked enquiry ${enquiryId} to customer ID ${customerId}` });
+      log.audit({ title: 'Customer Linked', details: `Linked enquiry ${enquiryRecordId} to customer ID ${customerId}` });
     }
     catch (error) {
-      log.error({ title: 'Linking Error', details: error.message });
+      log.error({ title: 'linkCustomerToEnquiry Error', details: error.message });
     }
   }
 
   /**
    * Sends an email notification to the admin with enquiry details.
-   * @param {string} name - Customer name
-   * @param {string} emailValue - Customer email
-   * @param {string} subject - Enquiry subject
-   * @param {string} message - Enquiry message
+   * @param {string} customerName - Customer name
+   * @param {string} customerEmail - Customer email
+   * @param {string} enquirySubject - Enquiry subject
+   * @param {string} enquiryMessage - Enquiry message
    */
-  function notifyAdmin(name, emailValue, subject, message) {
+  function notifyAdmin(customerName, customerEmail, enquirySubject, enquiryMessage) {
     try {
       email.send({
-        author: ADMIN_EMPLOYEE_ID,
-        recipients: ADMIN_EMPLOYEE_ID,
+        author: adminEmployeeId,
+        recipients: adminEmployeeId,
         subject: 'New Customer Enquiry',
-        body: `Name: ${name}\nEmail: ${emailValue}\nSubject: ${subject}\nMessage: ${message}`
+        body: `Name: ${customerName}\nEmail: ${customerEmail}\nSubject: ${enquirySubject}\nMessage: ${enquiryMessage}`
       });
-      log.audit({ title: 'Admin Notified', details: `Enquiry from ${name} sent to admin.` });
+      log.audit({ title: 'Admin Notified', details: `Enquiry from ${customerName} sent to admin.` });
     }
     catch (error) {
-      log.error({ title: 'Admin Notification Error', details: error.message });
+      log.error({ title: 'notifyAdmin Error', details: error.message });
     }
   }
 
   /**
    * Sends an email notification to the customer's sales rep.
    * @param {number|string} salesRepId - Internal ID of the sales rep
-   * @param {string} name - Customer name
-   * @param {string} emailValue - Customer email
-   * @param {string} subject - Enquiry subject
-   * @param {string} message - Enquiry message
+   * @param {string} customerName - Customer name
+   * @param {string} customerEmail - Customer email
+   * @param {string} enquirySubject - Enquiry subject
+   * @param {string} enquiryMessage - Enquiry message
    */
-  function notifySalesRep(salesRepId, name, emailValue, subject, message) {
+  function notifySalesRep(salesRepId, customerName, customerEmail, enquirySubject, enquiryMessage) {
     try {
       email.send({
-        author: ADMIN_EMPLOYEE_ID,
+        author: adminEmployeeId,
         recipients: salesRepId,
         subject: 'Customer Enquiry Received',
-        body: `Customer: ${name} (${emailValue})\nSubject: ${subject}\nMessage: ${message}`
+        body: `Customer: ${customerName} (${customerEmail})\nSubject: ${enquirySubject}\nMessage: ${enquiryMessage}`
       });
-      log.audit({ title: 'Sales Rep Notified', details: `Enquiry from ${name} sent to sales rep ID ${salesRepId}.` });
+      log.audit({ title: 'Sales Rep Notified', details: `Enquiry from ${customerName} sent to sales rep ID ${salesRepId}.` });
     }
     catch (error) {
-      log.error({ title: 'Sales Rep Notification Error', details: error.message });
+      log.error({ title: 'notifySalesRep Error', details: error.message });
     }
   }
 
@@ -126,26 +126,26 @@ define(['N/record', 'N/search', 'N/email', 'N/runtime', 'N/log'], function (reco
     if (context.type !== context.UserEventType.CREATE) return;
 
     try {
-      const newRecord = context.newRecord;
-      const emailValue = newRecord.getValue('custrecord_jj_customer_email');
-      const nameValue = newRecord.getValue('custrecord_jj_customer_name');
-      const subjectValue = newRecord.getValue('custrecord_jj_subject');
-      const messageValue = newRecord.getValue('custrecord_jj_message');
+      const enquiryRecord = context.newRecord;
+      const customerEmail = enquiryRecord.getValue('custrecord_jj_customer_email');
+      const customerName = enquiryRecord.getValue('custrecord_jj_customer_name');
+      const enquirySubject = enquiryRecord.getValue('custrecord_jj_subject');
+      const enquiryMessage = enquiryRecord.getValue('custrecord_jj_message');
 
-      if (!emailValue) return;
+      if (!customerEmail) return;
 
-      notifyAdmin(nameValue, emailValue, subjectValue, messageValue);
+      notifyAdmin(customerName, customerEmail, enquirySubject, enquiryMessage);
 
-      const customer = findCustomerByEmail(emailValue);
-      if (customer) {
-        const customerId = customer.getValue('internalid');
-        const salesRepId = customer.getValue('salesrep');
+      const customerRecord = findCustomerByEmail(customerEmail);
+      if (customerRecord) {
+        const customerId = customerRecord.getValue('internalid');
+        const salesRepId = customerRecord.getValue('salesrep');
         log.debug('Customer Found', `Customer ID: ${customerId}, Sales Rep ID: ${salesRepId}`);
 
-        linkCustomerToEnquiry(newRecord.id, customerId);
+        linkCustomerToEnquiry(enquiryRecord.id, customerId);
 
         if (salesRepId) {
-          notifySalesRep(salesRepId, nameValue, emailValue, subjectValue, messageValue);
+          notifySalesRep(salesRepId, customerName, customerEmail, enquirySubject, enquiryMessage);
         }
       }
     }
