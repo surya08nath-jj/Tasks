@@ -17,17 +17,18 @@
  * 
  * REVISION HISTORY
  *
- * @version 1.0
+ * @version 1.1 - Added duplicate check using N/search
  * 
 *************************************************************************************************/
 
-define(['N/ui/serverWidget', 'N/record', 'N/log'],
+define(['N/ui/serverWidget', 'N/record', 'N/log', 'N/search'],
     /**
      * @param {serverWidget} serverWidget
      * @param {record} record
      * @param {log} log
+     * @param {search} search
      */
-    function (serverWidget, record, log) {
+    function (serverWidget, record, log, search) {
 
         /**
          * Entry point for Suitelet execution.
@@ -116,6 +117,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'],
 
         /**
          * Saves the submitted donor details to a custom record.
+         * Prevents duplicate donors based on phone number.
          * @param {Object} context - Suitelet context object
          */
         function saveRecord(context) {
@@ -135,6 +137,26 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'],
                     throw new Error('Last Donation Date cannot be a future date.');
                 }
 
+                const phoneNumber = (params['custrecord_jj_phone_number_'] || '').trim();
+                if (!phoneNumber) {
+                    throw new Error('Phone Number is required.');
+                }
+
+                // 🔍 Duplicate check using N/search
+                const donorSearch = search.create({
+                    type: 'customrecord_jj_blood_donor_details',
+                    filters: [
+                        ['custrecord_jj_phone_numbers', 'is', phoneNumber]
+                    ],
+                    columns: ['internalid']
+                });
+
+                const results = donorSearch.run().getRange({ start: 0, end: 1 });
+                if (results && results.length > 0) {
+                    throw new Error('Duplicate donor found. A record with this phone number already exists.');
+                }
+
+                // 📝 Create new donor record only if no duplicate found
                 const donorRecord = record.create({
                     type: 'customrecord_jj_blood_donor_details',
                     isDynamic: true
@@ -157,7 +179,7 @@ define(['N/ui/serverWidget', 'N/record', 'N/log'],
 
                 donorRecord.setValue({
                     fieldId: 'custrecord_jj_phone_numbers',
-                    value: params['custrecord_jj_phone_number_'] || ''
+                    value: phoneNumber
                 });
 
                 donorRecord.setValue({
