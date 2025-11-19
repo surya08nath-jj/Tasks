@@ -41,7 +41,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/log', 'N/search'],
                 } else {
                     saveRecord(context);
                 }
-            } catch (e) {
+            } 
+            catch (e) {
                 log.error('Error in onRequest', e.message || e.toString());
             }
         }
@@ -110,7 +111,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/log', 'N/search'],
                 form.addSubmitButton({ label: 'Submit' });
 
                 context.response.writePage(form);
-            } catch (error) {
+            } 
+            catch (error) {
                 log.error('displayForm Error', error.message || error.toString());
             }
         }
@@ -206,7 +208,8 @@ define(['N/ui/serverWidget', 'N/record', 'N/log', 'N/search'],
                 msgField.defaultValue = '<div style="color:green;font-weight:bold;">Donor Registered Successfully.</div>';
                 context.response.writePage(form);
 
-            } catch (error) {
+            } 
+            catch (error) {
                 log.error('saveRecord Error', error.message || error.toString());
 
                 const errForm = serverWidget.createForm({ title: 'Error' });
