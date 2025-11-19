@@ -13,7 +13,7 @@
  * 
  * Date Created : 11-November-2025 
  * 
- * Description : Suitelet script to display a form for searching eligible blood donors based on 
+ * Description : Suitelet script to display a form for searching eligible blood bloodDonors based on 
  *               selected blood group and last donation date.
  * 
  * REVISION HISTORY
@@ -35,7 +35,8 @@ define(['N/ui/serverWidget', 'N/search', 'N/log'], function (serverWidget, searc
         try {
             log.debug('Suitelet Triggered', 'Request method: ' + context.request.method);
             displayForm(context);
-        } catch (e) {
+        } 
+        catch (e) {
             log.error('Error in onRequest', e.message || e.toString());
         }
     }
@@ -105,9 +106,9 @@ define(['N/ui/serverWidget', 'N/search', 'N/log'], function (serverWidget, searc
                 ]
             });
 
-            const donors = [];
+            const bloodDonors = [];
             donorSearch.run().each(result => {
-                donors.push({
+                bloodDonors.push({
                     name: result.getValue('custrecord_jj_first_name') + ' ' + result.getValue('custrecord_jj_last_name'),
                     phone: result.getValue('custrecord_jj_phone_numbers'),
                     bloodGroup: result.getText('custrecord_jj_blood_group'),
@@ -120,38 +121,39 @@ define(['N/ui/serverWidget', 'N/search', 'N/log'], function (serverWidget, searc
                 id: 'custpage_result_msg',
                 type: serverWidget.FieldType.INLINEHTML,
                 label: ' '
-            }).defaultValue = `<b>Found ${donors.length} eligible donor(s)</b>`;
+            }).defaultValue = `<b>Found ${bloodDonors.length} eligible donor(s)</b>`;
 
-            if (donors.length > 0) {
-                const sublist = form.addSublist({
+            if (bloodDonors.length > 0) {
+                const sublistForm = form.addSublist({
                     id: 'custpage_donors',
                     type: serverWidget.SublistType.LIST,
                     label: 'Eligible Donors'
                 });
 
-                sublist.addField({ id: 'custpage_name', type: serverWidget.FieldType.TEXT, label: 'Name' });
-                sublist.addField({ id: 'custpage_phone', type: serverWidget.FieldType.PHONE, label: 'Phone Number' });
-                sublist.addField({ id: 'custpage_bloodgroup', type: serverWidget.FieldType.TEXT, label: 'Blood Group' });
-                sublist.addField({ id: 'custpage_lastdonation', type: serverWidget.FieldType.DATE, label: 'Last Donation Date' });
+                sublistForm.addField({ id: 'custpage_name', type: serverWidget.FieldType.TEXT, label: 'Name' });
+                sublistForm.addField({ id: 'custpage_phone', type: serverWidget.FieldType.PHONE, label: 'Phone Number' });
+                sublistForm.addField({ id: 'custpage_bloodgroup', type: serverWidget.FieldType.TEXT, label: 'Blood Group' });
+                sublistForm.addField({ id: 'custpage_lastdonation', type: serverWidget.FieldType.DATE, label: 'Last Donation Date' });
 
-                donors.forEach((donor, i) => {
-                    sublist.setSublistValue({ id: 'custpage_name', line: i, value: donor.name });
-                    sublist.setSublistValue({ id: 'custpage_phone', line: i, value: donor.phone });
-                    sublist.setSublistValue({ id: 'custpage_bloodgroup', line: i, value: donor.bloodGroup });
-                    sublist.setSublistValue({ id: 'custpage_lastdonation', line: i, value: donor.lastDonation });
+                bloodDonors.forEach((donor, i) => {
+                    sublistForm.setSublistValue({ id: 'custpage_name', line: i, value: donor.name });
+                    sublistForm.setSublistValue({ id: 'custpage_phone', line: i, value: donor.phone });
+                    sublistForm.setSublistValue({ id: 'custpage_bloodgroup', line: i, value: donor.bloodGroup });
+                    sublistForm.setSublistValue({ id: 'custpage_lastdonation', line: i, value: donor.lastDonation });
                 });
             } else {
                 form.addField({
                     id: 'custpage_no_result',
                     type: serverWidget.FieldType.INLINEHTML,
                     label: ' '
-                }).defaultValue = '<p>No eligible donors found.</p>';
+                }).defaultValue = '<p>No eligible bloodDonors found.</p>';
             }
 
             form.addSubmitButton({ label: 'Search' });
             context.response.writePage(form);
 
-        } catch (formError) {
+        } 
+        catch (formError) {
             log.error('displayForm Error', formError.message || formError.toString());
         }
     }
