@@ -59,7 +59,8 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search'],
                 });
 
                 return { soTotal, depositTotal };
-            } catch (error) {
+            } 
+            catch (error) {
                 log.error({ title: 'getSalesOrderAndDepositTotals Error', details: error.message });
                 throw error;
             }
@@ -90,7 +91,8 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search'],
                             `Deposit sufficient for Sales Order ${soId}. Single fulfillment allowed.`);
                     }
                 }
-            } catch (error) {
+            } 
+            catch (error) {
                 log.error({ title: 'applyRestrictionLogic Error', details: error.message });
                 throw error;
             }
@@ -134,7 +136,8 @@ define(['N/log', 'N/record', 'N/runtime', 'N/search'],
 
                 applyRestrictionLogic(execContext, soId, soTotal, depositTotal);
 
-            } catch (error) {
+            } 
+            catch (error) {
                 handleError(error);
             }
         };
