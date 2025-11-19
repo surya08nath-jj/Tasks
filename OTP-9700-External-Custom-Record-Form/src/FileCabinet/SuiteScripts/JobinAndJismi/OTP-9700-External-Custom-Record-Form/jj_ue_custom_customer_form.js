@@ -131,25 +131,26 @@ Team Netsuite`
         subject: 'Customer Enquiry Received',
         body: `Dear Sales Representative,
 
-You have received a new customer enquiry. Please find the details below:
+              You have received a new customer enquiry. Please find the details below:
 
-Customer Name: ${customerName}
-Customer Email: ${customerEmail}
-Subject: ${enquirySubject}
-Message:
-${enquiryMessage}
+              Customer Name: ${customerName}
+              Customer Email: ${customerEmail}
+              Subject: ${enquirySubject}
+              Message:
+              ${enquiryMessage}
 
-Kindly follow up with the customer at your earliest convenience.
+              Kindly follow up with the customer at your earliest convenience.
 
-Best regards,
-Team Netsuite`
-      });
+              Best regards,
+              Team Netsuite`
+                    });
 
       log.audit({
         title: 'Sales Rep Notified',
         details: `Enquiry from ${customerName} sent to sales rep ID ${salesRepId}.`
       });
-    } catch (error) {
+    } 
+    catch (error) {
       log.error({
         title: 'Email Notification Failed',
         details: `Failed to send enquiry notification to sales rep ID ${salesRepId}. Error: ${error.message}`
