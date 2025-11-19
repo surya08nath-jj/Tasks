@@ -26,7 +26,7 @@ define(['N/url', 'N/currentRecord'],
     const deploymentId = 'customdeploy_jj_sl_so_basedonstatus';
 
     /**
-     * Triggered when a field value changes on the form.
+     * Triggered when a field fieldValue changes on the form.
      * If the changed field is one of the filter fields, reloads the Suitelet with updated parameters.
      *
      * @param {Object} context - Field change context
@@ -47,9 +47,9 @@ define(['N/url', 'N/currentRecord'],
         const params = {};
 
         Object.keys(fieldMap).forEach(fieldId => {
-          const value = record.getValue({ fieldId });
-          if (value) {
-            params[fieldMap[fieldId]] = value;
+          const fieldValue = record.getValue({ fieldId });
+          if (fieldValue) {
+            params[fieldMap[fieldId]] = fieldValue;
           }
         });
 
