@@ -19,7 +19,7 @@
  *
  * @version 1.0 
  * 
-*************************************************************************************************/ 
+*************************************************************************************************/
 
 define(['N/log'], function (log) {
 
@@ -37,7 +37,8 @@ define(['N/log'], function (log) {
             const addressChanged = hasAddressChanged(newRecord, oldRecord);
             updateCheckbox(newRecord, addressChanged);
 
-        } catch (e) {
+        }
+        catch (e) {
             log.error('Error in beforeSubmit', e.message);
         }
     }
@@ -54,7 +55,8 @@ define(['N/log'], function (log) {
                 return false;
             }
             return true;
-        } catch (error) {
+        }
+        catch (error) {
             log.error('isEditContext Error', error.message);
             return false;
         }
@@ -102,7 +104,8 @@ define(['N/log'], function (log) {
             }
 
             return false;
-        } catch (error) {
+        }
+        catch (error) {
             log.error('hasAddressChanged Error', error.message);
             return false;
         }
@@ -130,7 +133,8 @@ define(['N/log'], function (log) {
             }
 
             return false;
-        } catch (error) {
+        }
+        catch (error) {
             log.error('isAddressLineChanged Error', error.message);
             return false;
         }
@@ -149,7 +153,8 @@ define(['N/log'], function (log) {
             });
 
             log.debug('Checkbox Updated', `custentity_jj_address_changed set to ${isChanged}`);
-        } catch (error) {
+        }
+        catch (error) {
             log.error('updateCheckbox Error', error.message);
         }
     }
