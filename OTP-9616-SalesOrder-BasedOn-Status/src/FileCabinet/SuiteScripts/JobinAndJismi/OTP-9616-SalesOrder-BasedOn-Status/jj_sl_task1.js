@@ -4,12 +4,12 @@
  */
 
 /*************************************************************************************
- * Project Name : OTP-9616
+ * Project Name : OTP-9616-Sales Order Based On Status
  *
  * Author: Suryanath G
  * Date Created : 06-November-2025
  *
- * Description : Custom Suitelet page to display Sales Orders based on selected filters such as status, customer, subsidiary, and department.
+ * Description : Custom Suitelet page to display Sales Orders based on selected searchFilters such as status, customer, subsidiary, and department.
  *
  * REVISION HISTORY
  * @version 1.1 : Initial build
@@ -38,15 +38,16 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
         const form = createFormWithFilters();
         applyDefaultFilterValues(form, request.parameters);
 
-        const salesorderSublist = buildSalesOrderSublist(form);
+        const salesorderSublist = buildSalesOrderSublist(form); 
 
-        const filters = buildSearchFilters(request.parameters);
-        const results = runSalesOrderSearch(filters);
+        const searchFilters = buildSearchFilters(request.parameters);
+        const searchResults = runSalesOrderSearch(searchFilters);
 
-        populateSublistWithResults(salesorderSublist, results);
+        populateSublistWithResults(salesorderSublist, searchResults);
 
         response.writePage(form);
-      } catch (e) {
+      } 
+      catch (e) {
         log.error('Suitelet Error', e);
         scriptContext.response.write('An unexpected error occurred. Please contact your administrator.');
       }
@@ -93,7 +94,8 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
         });
 
         return form;
-      } catch (err) {
+      } 
+      catch (err) {
         log.error('createFormWithFilters failed', err);
         throw err;
       }
@@ -121,20 +123,21 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
             }
           }
         });
-      } catch (err) {
+      } 
+      catch (err) {
         log.error('applyDefaultFilterValues failed', err);
         throw err;
       }
     }
 
     /**
-     * Builds the sublist to display Sales Order results.
+     * Builds the sublist to display Sales Order searchResults.
      * @param {Form} form - NetSuite form object
      * @returns {Sublist} NetSuite sublist object
      */
     function buildSalesOrderSublist(form) {
       try {
-        const sublist = form.addSublist({
+        const formSublist = form.addSublist({
           id: 'custpage_jj_salesorder_sublist',
           type: serverWidget.SublistType.LIST,
           label: 'Sales Orders'
@@ -154,83 +157,86 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
           { id: 'custpage_jj_so_total', type: serverWidget.FieldType.CURRENCY, label: 'Total' }
         ];
 
-        fields.forEach(field => sublist.addField(field));
-        return sublist;
-      } catch (err) {
+        fields.forEach(field => formSublist.addField(field));
+        return formSublist;
+      } 
+      catch (err) {
         log.error('buildSalesOrderSublist failed', err);
         throw err;
       }
     }
 
     /**
-     * Builds search filters based on request parameters.
+     * Builds search searchFilters based on request parameters.
      * @param {Object} params - Request parameters
-     * @returns {Array} Array of search filters
+     * @returns {Array} Array of search searchFilters
      */
     function buildSearchFilters(params) {
       try {
-        const filters = [
+        const searchFilters = [
           ['mainline', 'is', 'T'],
           'AND',
           ['status', 'anyof', ['SalesOrd:B', 'SalesOrd:F']]
         ];
 
         if (params.custpage_jj_status_filter) {
-          filters.push('AND', ['status', 'anyof', params.custpage_jj_status_filter]);
+          searchFilters.push('AND', ['status', 'anyof', params.custpage_jj_status_filter]);
         }
         if (params.custpage_jj_customer_filter) {
-          filters.push('AND', ['entity', 'anyof', params.custpage_jj_customer_filter]);
+          searchFilters.push('AND', ['entity', 'anyof', params.custpage_jj_customer_filter]);
         }
         if (params.custpage_jj_subsidiary_filter) {
-          filters.push('AND', ['subsidiary', 'anyof', params.custpage_jj_subsidiary_filter]);
+          searchFilters.push('AND', ['subsidiary', 'anyof', params.custpage_jj_subsidiary_filter]);
         }
         if (params.custpage_jj_department_filter) {
-          filters.push('AND', ['department', 'anyof', params.custpage_jj_department_filter]);
+          searchFilters.push('AND', ['department', 'anyof', params.custpage_jj_department_filter]);
         }
 
-        return filters;
-      } catch (err) {
+        return searchFilters;
+      } 
+      catch (err) {
         log.error('buildSearchFilters failed', err);
         throw err;
       }
     }
 
     /**
-     * Executes the Sales Order search using provided filters.
-     * @param {Array} filters - Search filters
-     * @returns {Result[]} Array of search results
+     * Executes the Sales Order search using provided searchFilters.
+     * @param {Array} searchFilters - Search searchFilters
+     * @returns {Result[]} Array of search searchResults
      */
-    function runSalesOrderSearch(filters) {
+    function runSalesOrderSearch(searchFilters) {
       try {
         const soSearch = search.create({
           type: search.Type.SALES_ORDER,
-          filters: filters,
+          searchFilters: searchFilters,
           columns: [
             'internalid', 'tranid', 'trandate', 'statusref', 'entity',
             'subsidiary', 'department', 'class', 'grossamount', 'taxamount', 'amount'
           ]
         });
 
-        const results = [];
+        const searchResults = [];
         soSearch.run().each(result => {
-          results.push(result);
+          searchResults.push(result);
           return true;
         });
-        return results;
-      } catch (err) {
+        return searchResults;
+      } 
+      catch (err) {
         log.error('runSalesOrderSearch failed', err);
         throw err;
       }
     }
 
     /**
-     * Populates the sublist with Sales Order search results.
+     * Populates the sublist with Sales Order search searchResults.
      * @param {Sublist} sublist - NetSuite sublist object
-     * @param {Result[]} results - Array of search results
+     * @param {Result[]} searchResults - Array of search searchResults
      */
-    function populateSublistWithResults(sublist, results) {
+    function populateSublistWithResults(sublist, searchResults) {
       try {
-        results.forEach((result, line) => {
+        searchResults.forEach((result, line) => {
           safeSet(sublist, { id: 'custpage_jj_so_internalid', line, value: result.getValue('internalid') });
           safeSet(sublist, { id: 'custpage_jj_so_tranid', line, value: result.getValue('tranid') });
           safeSet(sublist, { id: 'custpage_jj_so_date', line, value: result.getValue('trandate') });
@@ -243,7 +249,8 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
           safeSet(sublist, { id: 'custpage_jj_so_tax', line, value: result.getValue('taxamount') });
           safeSet(sublist, { id: 'custpage_jj_so_total', line, value: result.getValue('amount') });
         });
-      } catch (err) {
+      } 
+      catch (err) {
         log.error('populateSublistWithResults failed', err);
         throw err;
       }
@@ -261,14 +268,15 @@ define(['N/log', 'N/search', 'N/ui/serverWidget'],
 
     function safeSet(sublist, { id, line, value }) {
       try {
-        let val = value ?? '';
-        if (val instanceof Date) {
-          val = val.toISOString().split('T')[0];
+        let fieldVal = value ?? '';
+        if (fieldVal instanceof Date) {
+          fieldVal = fieldVal.toISOString().split('T')[0];
         } else {
-          val = String(val);
+          fieldVal = String(fieldVal);
         }
-        sublist.setSublistValue({ id, line, value: val });
-      } catch (err) {
+        sublist.setSublistValue({ id, line, value: fieldVal });
+      } 
+      catch (err) {
         log.error('safeSet failed', { id, line, error: err });
       }
     }
