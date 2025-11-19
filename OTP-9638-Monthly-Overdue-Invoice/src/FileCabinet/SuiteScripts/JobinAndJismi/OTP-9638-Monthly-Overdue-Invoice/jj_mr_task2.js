@@ -60,7 +60,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
             'daysoverdue'
           ]
         });
-      } catch (error) {
+      }
+      catch (error) {
         log.error('createInvoiceSearch Error', error.message);
         throw error;
       }
@@ -76,7 +77,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           log.debug('Search Result', `Customer: ${searchResult.getText('entity')}, Invoice: ${searchResult.getValue('tranid')}, Amount: ${searchResult.getValue('amount')}, Due: ${searchResult.getValue('duedate')}, Days Overdue: ${searchResult.getValue('daysoverdue')}`);
           return true;
         });
-      } catch (error) {
+      }
+      catch (error) {
         log.error('logSearchResults Error', error.message);
       }
     };
@@ -92,7 +94,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           type: record.Type.CUSTOMER,
           id: customerId
         }).getValue('email');
-      } catch (error) {
+      }
+      catch (error) {
         log.error('getCustomerEmail Error', error.message);
         return null;
       }
@@ -121,7 +124,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
 
         csvFile.save();
         return csvFile;
-      } catch (error) {
+      }
+      catch (error) {
         log.error('createCsvFile Error', error.message);
         throw error;
       }
@@ -146,7 +150,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
         });
 
         log.audit('Email Sent', `Email sent to ${customerName} (${customerEmail}) from sender ID ${senderId}.`);
-      } catch (error) {
+      }
+      catch (error) {
         log.error('sendEmailWithAttachment Error', `Customer: ${customerName}, Error: ${error.message}`);
       }
     };
@@ -161,7 +166,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
         const invoiceSearchObj = createInvoiceSearch();
         logSearchResults(invoiceSearchObj);
         return invoiceSearchObj;
-      } catch (error) {
+      }
+      catch (error) {
         log.error('getInputData Error', error.message);
         throw error;
       }
@@ -191,7 +197,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
           key: customerId,
           value: invoiceSummary
         });
-      } catch (error) {
+      }
+      catch (error) {
         log.error('map Error', error.message);
       }
     };
@@ -218,7 +225,8 @@ define(['N/search', 'N/log', 'N/file', 'N/email', 'N/record'],
         const senderId = salesRepId || fallbackSenderId;
 
         sendEmailWithAttachment(senderId, customerId, customerName, csvFile, customerEmail);
-      } catch (error) {
+      }
+      catch (error) {
         log.error('reduce Error', error.message);
       }
     };
